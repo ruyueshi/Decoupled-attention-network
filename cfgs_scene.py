@@ -43,25 +43,25 @@ dataset_cfgs = {
     },
 
     'case_sensitive': False,
-    'dict_dir' : 'dict/dic_36.txt'
+    'dict_dir': 'dict/dic_36.txt'
 }
 
 net_cfgs = {
     'FE': Feature_Extractor,
     'FE_args': {
-        'strides': [(1,1), (2,2), (1,1), (2,2), (1,1), (1,1)],
-        'compress_layer' : False, 
-        'input_shape': [1, 32, 128], # C x H x W
+        'strides': [(1, 1), (2, 2), (1, 1), (2, 2), (1, 1), (1, 1)],
+        'compress_layer': False,
+        'input_shape': [1, 32, 128],  # C x H x W
     },
     'CAM': CAM,
     'CAM_args': {
-        'maxT': 25, 
-        'depth': 8, 
+        'maxT': 25,
+        'depth': 8,
         'num_channels': 64,
     },
     'DTD': DTD,
     'DTD_args': {
-        'nclass': 38, # extra 2 classes for Unkonwn and End-token
+        'nclass': 38,  # extra 2 classes for Unkonwn and End-token
         'nchannel': 512,
         'dropout': 0.3,
     },
@@ -74,7 +74,7 @@ net_cfgs = {
 optimizer_cfgs = {
     # optim for FE
     'optimizer_0': optim.Adadelta,
-    'optimizer_0_args':{
+    'optimizer_0_args': {
         'lr': 1.0,
     },
 
@@ -86,7 +86,7 @@ optimizer_cfgs = {
 
     # optim for CAM
     'optimizer_1': optim.Adadelta,
-    'optimizer_1_args':{
+    'optimizer_1_args': {
         'lr': 1.0,
     },
     'optimizer_1_scheduler': optim.lr_scheduler.MultiStepLR,
@@ -97,7 +97,7 @@ optimizer_cfgs = {
 
     # optim for DTD
     'optimizer_2': optim.Adadelta,
-    'optimizer_2_args':{
+    'optimizer_2_args': {
         'lr': 1.0,
     },
     'optimizer_2_scheduler': optim.lr_scheduler.MultiStepLR,
@@ -114,6 +114,7 @@ saving_cfgs = {
     'saving_path': 'models/scene/exp1_',
 }
 
+
 def mkdir(path_):
     paths = path_.split('/')
     command_str = 'mkdir '
@@ -122,9 +123,10 @@ def mkdir(path_):
     command_str = command_str[0:-1]
     os.system(command_str)
 
+
 def showcfgs(s):
     for key in s.keys():
-        print(key , s[key])
+        print(key, s[key])
     print('')
 
-mkdir(saving_cfgs['saving_path'])
+# mkdir(saving_cfgs['saving_path'])

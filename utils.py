@@ -7,39 +7,46 @@ import cv2
 import json
 import editdistance as ed
 
+
 class cha_encdec():
-    def __init__(self, dict_file, case_sensitive = True):
+    def __init__(self, dict_file, case_sensitive=True):
         self.dict = []
         self.case_sensitive = case_sensitive
-        lines = open(dict_file , 'r').readlines()
+        lines = open(dict_file, 'r').readlines()
         for line in lines:
             self.dict.append(line.replace('\n', ''))
+
     def encode(self, label_batch):
         max_len = max([len(s) for s in label_batch])
-        out = torch.zeros(len(label_batch), max_len+1).long()
+        out = torch.zeros(len(label_batch), max_len + 1).long()
         for i in range(0, len(label_batch)):
             if not self.case_sensitive:
-                cur_encoded = torch.tensor([self.dict.index(char.lower()) if char.lower() in self.dict else len(self.dict)
-                                     for char in label_batch[i]]) + 1
+                cur_encoded = torch.tensor(
+                    [self.dict.index(char.lower()) if char.lower() in self.dict else len(self.dict)
+                     for char in label_batch[i]]) + 1
             else:
                 cur_encoded = torch.tensor([self.dict.index(char) if char in self.dict else len(self.dict)
-                                     for char in label_batch[i]]) + 1
+                                            for char in label_batch[i]]) + 1
             out[i][0:len(cur_encoded)] = cur_encoded
         return out
+
     def decode(self, net_out, length):
-    # decoding prediction into text with geometric-mean probability
-    # the probability is used to select the more realiable prediction when using bi-directional decoders
+        # decoding prediction into text with geometric-mean probability
+        # the probability is used to select the more realiable prediction when using bi-directional decoders
         out = []
-        out_prob = [] 
-        net_out = F.softmax(net_out, dim = 1)
+        out_prob = []
+        net_out = F.softmax(net_out, dim=1)
         for i in range(0, length.shape[0]):
-            current_idx_list = net_out[int(length[:i].sum()) : int(length[:i].sum() + length[i])].topk(1)[1][:,0].tolist()
-            current_text = ''.join([self.dict[_-1] if _ > 0 and _ <= len(self.dict) else '' for _ in current_idx_list])
-            current_probability = net_out[int(length[:i].sum()) : int(length[:i].sum() + length[i])].topk(1)[0][:,0]
+            current_idx_list = net_out[int(length[:i].sum()): int(length[:i].sum() + length[i])].topk(1)[1][:,
+                               0].tolist()
+            current_text = ''.join(
+                [self.dict[_ - 1] if _ > 0 and _ <= len(self.dict) else '' for _ in current_idx_list])
+            current_probability = net_out[int(length[:i].sum()): int(length[:i].sum() + length[i])].topk(1)[0][:, 0]
             current_probability = torch.exp(torch.log(current_probability).sum() / current_probability.size()[0])
             out.append(current_text)
             out_prob.append(current_probability)
         return (out, out_prob)
+
 
 class Attention_AR_counter():
     def __init__(self, display_string, dict_file, case_sensitive):
@@ -60,7 +67,7 @@ class Attention_AR_counter():
         self.total_C = 0.
         self.distance_W = 0
         self.total_W = 0.
-        
+
     def add_iter(self, output, out_length, label_length, labels):
         start = 0
         start_o = 0
@@ -84,8 +91,8 @@ class Attention_AR_counter():
             self.correct = self.correct + 1 if labels[i] == prdt_texts[i] else self.correct
 
     def show(self):
-    # Accuracy for scene text. 
-    # CER and WER for handwritten text.
+        # Accuracy for scene text.
+        # CER and WER for handwritten text.
         print(self.display_string)
         if self.total_samples == 0:
             pass
@@ -96,12 +103,13 @@ class Attention_AR_counter():
             self.distance_W / self.total_W))
         self.clear()
 
+
 class Loss_counter():
     def __init__(self, display_interval):
         self.display_interval = display_interval
         self.total_iters = 0.
         self.loss_sum = 0
-    
+
     def add_iter(self, loss):
         self.total_iters += 1
         self.loss_sum += float(loss)
@@ -109,7 +117,7 @@ class Loss_counter():
     def clear(self):
         self.total_iters = 0
         self.loss_sum = 0
-    
+
     def get_loss(self):
         loss = self.loss_sum / self.total_iters if self.total_iters > 0 else 0
         self.total_iters = 0

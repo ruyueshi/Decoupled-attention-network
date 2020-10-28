@@ -1,0 +1,1 @@
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/boost/lib:/usr/local/opencv2/lib

@@ -1,7 +1,7 @@
 Colour
 LMDB
 Pillow
-opencv-python
+opencv-python==4.1.2.30
 torch==0.4.1
 torchvision==0.2.1
 editdistance
