@@ -80,7 +80,6 @@ optimizer_cfgs = {
         'lr': 0.1,
         'momentum': 0.9,
     },
-
     'optimizer_0_scheduler': optim.lr_scheduler.MultiStepLR,
     'optimizer_0_scheduler_args': {
         'milestones': [20, 40, 60, 80],

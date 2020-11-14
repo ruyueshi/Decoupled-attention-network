@@ -3,4 +3,7 @@
 /models/
 /data/IAM/lines/
 /data/IAM/words/
+/examples/
+/case/
 *.pyc
+result-*.txt

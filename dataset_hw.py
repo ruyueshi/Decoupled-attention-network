@@ -21,6 +21,7 @@ class LineGenerate():
                 standard.append(line.strip('\n'))
         self.image = []
         self.label = []
+        self.name = []
         line_prefix = '/'.join(IAMPath.split('/')[:-1]) + '/lines'
         IAMLine = line_prefix + '.txt'
         count = 0
@@ -35,6 +36,7 @@ class LineGenerate():
                     if img is not None:
                         self.image.append(img)
                         self.label.append(elements[-1])
+                        self.name.append(pth)
                         count += 1
                         if count >= img_max_num:
                             break
@@ -49,10 +51,12 @@ class LineGenerate():
             idx = np.random.randint(self.len)
             image = self.image[idx]
             label = self.label[idx]
+            name = self.name[idx]
         else:
             idx = self.idx
             image = self.image[idx]
             label = self.label[idx]
+            name = self.name[idx]
             self.idx += 1
         if self.idx == self.len:
             self.idx -= self.len
@@ -86,7 +90,7 @@ class LineGenerate():
 
         imageN = imageN.astype('float32')
         imageN = (imageN - 127.5) / 127.5
-        return imageN, label
+        return imageN, label, name
 
 
 class WordGenerate():
@@ -178,10 +182,10 @@ class IAMDataset(Dataset):
         return self.LG.get_len()
 
     def __getitem__(self, idx):
-        imageN, label = self.LG.generate_line()
+        imageN, label, name = self.LG.generate_line()
 
         imageN = imageN.reshape(1, self.conH, self.conW)
-        sample = {'image': torch.from_numpy(imageN), 'label': label}
+        sample = {'image': torch.from_numpy(imageN), 'label': label, 'name': name}
 
         return sample
 

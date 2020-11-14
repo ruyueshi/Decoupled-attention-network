@@ -13,16 +13,17 @@ import pdb
 import os
 import cv2
 
+
 class lmdbDataset(Dataset):
 
-    def __init__(self, roots=None, ratio=None, img_height = 32, img_width = 128,
-        transform=None, global_state='Test'):
+    def __init__(self, roots=None, ratio=None, img_height=32, img_width=128,
+                 transform=None, global_state='Test'):
         self.envs = []
         self.nSamples = 0
         self.lengths = []
         self.ratio = []
         self.global_state = global_state
-        for i in range(0,len(roots)):
+        for i in range(0, len(roots)):
             env = lmdb.open(
                 roots[i],
                 max_readers=1,
@@ -31,7 +32,7 @@ class lmdbDataset(Dataset):
                 readahead=False,
                 meminit=False)
             if not env:
-                print('cannot creat lmdb from %s' % (root))
+                print('cannot creat lmdb from %s' % (roots))
                 sys.exit(0)
             with env.begin(write=False) as txn:
                 nSamples = int(txn.get('num-samples'.encode()))
@@ -40,23 +41,23 @@ class lmdbDataset(Dataset):
             self.envs.append(env)
 
         if ratio != None:
-            assert len(roots) == len(ratio) ,'length of ratio must equal to length of roots!'
-            for i in range(0,len(roots)):
+            assert len(roots) == len(ratio), 'length of ratio must equal to length of roots!'
+            for i in range(0, len(roots)):
                 self.ratio.append(ratio[i] / float(sum(ratio)))
         else:
-            for i in range(0,len(roots)):
+            for i in range(0, len(roots)):
                 self.ratio.append(self.lengths[i] / float(self.nSamples))
 
         self.transform = transform
-        self.maxlen = max(self.lengths)
+        self.maxlen = max(self.lengths) if len(self.lengths) > 0 else 0
         self.img_height = img_height
         self.img_width = img_width
         self.target_ratio = img_width / float(img_height)
 
-    def __fromwhich__(self ):
+    def __fromwhich__(self):
         rd = random.random()
         total = 0
-        for i in range(0,len(self.ratio)):
+        for i in range(0, len(self.ratio)):
             total += self.ratio[i]
             if rd <= total:
                 return i
@@ -76,11 +77,11 @@ class lmdbDataset(Dataset):
             cur_target_height = self.img_height
             cur_target_width = int(self.img_height * cur_ratio)
         img = cv2.resize(img, (cur_target_width, cur_target_height))
-        start_x = int((mask_height - img.shape[0])/2)
-        start_y = int((mask_width - img.shape[1])/2)
+        start_x = int((mask_height - img.shape[0]) / 2)
+        start_y = int((mask_width - img.shape[1]) / 2)
         mask = np.zeros([mask_height, mask_width]).astype(np.uint8)
-        mask[start_x : start_x + img.shape[0], start_y : start_y + img.shape[1]] = img
-        img = mask        
+        mask[start_x: start_x + img.shape[0], start_y: start_y + img.shape[1]] = img
+        img = mask
         return img
 
     def __len__(self):
@@ -89,7 +90,7 @@ class lmdbDataset(Dataset):
     def __getitem__(self, index):
         fromwhich = self.__fromwhich__()
         if self.global_state == 'Train':
-            index = random.randint(0,self.maxlen - 1)
+            index = random.randint(0, self.maxlen - 1)
         index = index % self.lengths[fromwhich]
         assert index <= len(self), 'index range error'
         index += 1
@@ -114,8 +115,8 @@ class lmdbDataset(Dataset):
             except:
                 print('Size error for %d' % index)
                 return self[index + 1]
-            img = img[:,:,np.newaxis]
+            img = img[:, :, np.newaxis]
             if self.transform:
                 img = self.transform(img)
-            sample = {'image': img, 'label': label}
+            sample = {'image': img, 'label': label, 'name': img_key}
             return sample

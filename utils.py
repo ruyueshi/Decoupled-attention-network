@@ -90,17 +90,49 @@ class Attention_AR_counter():
             self.total_W += len(l_words)
             self.correct = self.correct + 1 if labels[i] == prdt_texts[i] else self.correct
 
+    def add_iter2(self, output, out_length, label_length, labels, names):
+        start = 0
+        start_o = 0
+        self.total_samples += label_length.size()[0]
+        raw_prdts = output.topk(1)[1]
+        prdt_texts, prdt_prob = self.de.decode(output, out_length)
+        for i in range(0, len(prdt_texts)):
+            out = '{} {}'.format(names[i], prdt_texts[i])
+            print(out)
+            with open('result-scene.txt', 'a') as f:
+                f.write(out + '\n')
+            if not self.case_sensitive:
+                prdt_texts[i] = prdt_texts[i].lower()
+                labels[i] = labels[i].lower()
+            all_words = []
+            for w in labels[i].split('|') + prdt_texts[i].split('|'):
+                if w not in all_words:
+                    all_words.append(w)
+            l_words = [all_words.index(_) for _ in labels[i].split('|')]
+            p_words = [all_words.index(_) for _ in prdt_texts[i].split('|')]
+            self.distance_C += ed.eval(labels[i], prdt_texts[i])
+            self.distance_W += ed.eval(l_words, p_words)
+            self.total_C += len(labels[i])
+            self.total_W += len(l_words)
+            self.correct = self.correct + 1 if labels[i] == prdt_texts[i] else self.correct
+
     def show(self):
         # Accuracy for scene text.
         # CER and WER for handwritten text.
         print(self.display_string)
         if self.total_samples == 0:
             pass
-        print('Accuracy: {:.6f}, AR: {:.6f}, CER: {:.6f}, WER: {:.6f}'.format(
-            self.correct / self.total_samples,
-            1 - self.distance_C / self.total_C,
-            self.distance_C / self.total_C,
-            self.distance_W / self.total_W))
+        print(
+            'Line Accuracy: {:.6f}, Character Accuracy: {:.6f}\nCharacter Error Rate: {:.6f}, Word Error Rate: {:.6f}'.format(
+                self.correct / self.total_samples,
+                1 - self.distance_C / self.total_C,
+                self.distance_C / self.total_C,
+                self.distance_W / self.total_W))
+        # print('Accuracy: {:.6f}, AR: {:.6f}, CER: {:.6f}, WER: {:.6f}'.format(
+        #     self.correct / self.total_samples,
+        #     1 - self.distance_C / self.total_C,
+        #     self.distance_C / self.total_C,
+        #     self.distance_W / self.total_W))
         self.clear()
 
 

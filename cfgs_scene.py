@@ -16,7 +16,7 @@ global_cfgs = {
 dataset_cfgs = {
     'dataset_train': lmdbDataset,
     'dataset_train_args': {
-        'roots': ['path/to/lmdb_ST', 'path/to/lmdb_SK'],
+        'roots': [],  # ['path/to/lmdb_ST', 'path/to/lmdb_SK'],
         'img_height': 32,
         'img_width': 128,
         'transform': transforms.Compose([transforms.ToTensor()]),
@@ -30,14 +30,14 @@ dataset_cfgs = {
 
     'dataset_test': lmdbDataset,
     'dataset_test_args': {
-        'roots': ['path/to/lmdb_IIIT5K_test/or/any/other/testset'],
+        'roots': ['/media/chenlei/CL0/data/reg_dataset/IIIT5K_3000'],  # ['path/to/lmdb_IIIT5K_test/or/any/other/testset'],
         'img_height': 32,
         'img_width': 128,
         'transform': transforms.Compose([transforms.ToTensor()]),
         'global_state': 'Test',
     },
     'dataloader_test': {
-        'batch_size': 36,
+        'batch_size': 5,
         'shuffle': False,
         'num_workers': 3,
     },

@@ -112,6 +112,7 @@ def test(test_loader, model, tools):
     for sample_batched in test_loader:
         data = sample_batched['image']
         label = sample_batched['label']
+        name = sample_batched['name']
         target = tools[0].encode(label)
 
         data = data.cuda()
@@ -122,7 +123,7 @@ def test(test_loader, model, tools):
         features = model[0](data)
         A = model[1](features)
         output, out_length = model[2](features[-1], A, target, length, True)
-        tools[2].add_iter(output, out_length, length, label)
+        tools[2].add_iter2(output, out_length, length, label, name)
     tools[2].show()
     Train_or_Eval(model, 'Train')
 
